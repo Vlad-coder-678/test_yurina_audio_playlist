@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./styles/style.css" />
+    <script src="./scripts/playlist.js"></script>
+    <title>Playlist</title>
+  </head>
+  <body>
+    <div class="both" id="booth">
+      <div class="box_current_time" id="box_current_time">
+        <div class="line_current_time" id="line_current_time">
+          <div
+            class="line_current_time_position"
+            id="line_current_time_position"
+          ></div>
+        </div>
+      </div>
+      <div class="controls" id="consols">
+        <div class="control_left">
+          <a class="a_button control unSelected" id="prev"> prev </a>
+          <a class="a_button control unSelected" id="play"> play </a>
+          <a class="a_button control unSelected" id="next"> next </a>
+        </div>
+        <div class="control_right">
+          <a class="a_button control unSelected" id="mute"> mute </a>
+          <div class="volume" id="volume">
+            <div class="volume_position" id="volume_position"></div>
+          </div>
+        </div>
+      </div>
+      <div class="searcher" id="searcher">
+        <input
+          type="text"
+          class="input_searcher"
+          id="input_searcher"
+          placeholder="введите от 3 до 20 символов"
+        />
+      </div>
+      <div class="audioBox">
+        <div class="boxTitle">
+          <span class="artist unSelected">Artist</span>
+          <span class="title unSelected">Title</span>
+          <span class="duration unSelected">Duration</span>
+        </div>
+        <div class="boxAudioSelection" id="boxAudioSelection"></div>
+      </div>
+    </div>
+  </body>
+</html>
