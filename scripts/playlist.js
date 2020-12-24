@@ -17,7 +17,7 @@ window.onload = () => {
   let fillBar = document.getElementById("line_current_time_position");
   let duration = 0;
   let currentTime = 0;
-  let currentVolume = 1;
+  let currentVolume = 0.2;
   let valueSearcher = "";
 
   audio.setAttribute("id", "audio");
@@ -42,6 +42,9 @@ window.onload = () => {
   document.getElementById("volume").onclick = () => {
     volumeInit(Number(event.offsetX) / 100);
   };
+  document.getElementById("line_current_time").onclick = () => {
+    currentTimeInit(Number(event.offsetX));
+  };
   document.getElementById("input_searcher").oninput = () => {
     valueSearcher = event.target.value;
     if (valueSearcher.length >= 3 && valueSearcher.length <= 20) {
@@ -55,6 +58,33 @@ window.onload = () => {
   };
 
   // добавляем слушатели
+  audio.addEventListener("loadedmetadata", () => {
+    duration = audio.duration;
+  });
+  audio.addEventListener("timeupdate", () => {
+    currentTime = audio.currentTime;
+    setTimeInDom(currentTime);
+    let position = (currentTime / duration) * 100;
+    fillBar.style.width = position + "%";
+    if (duration > 0) {
+      for (let i = 0; i < audio.buffered.length; i++) {
+        console.log("i");
+        console.log(i);
+        if (
+          audio.buffered.start(audio.buffered.length - 1 - i) <
+          audio.currentTime
+        ) {
+          let widthLine =
+            (audio.buffered.end(audio.buffered.length - 1 - i) / duration) *
+            100;
+          document.getElementById("line_current_time_buffered").style.width =
+            widthLine + "%";
+          break;
+        }
+      }
+    }
+  });
+  audio.addEventListener("error", errorHandler, false);
   audio.addEventListener(
     "ended",
     () => {
@@ -63,35 +93,9 @@ window.onload = () => {
     },
     false
   );
-  audio.addEventListener("error", errorHandler, false);
-  audio.addEventListener("loadedmetadata", () => {
-    duration = audio.duration;
-  });
-  audio.addEventListener("timeupdate", () => {
-    currentTime = audio.currentTime;
-    let position = (currentTime / duration) * 100;
-    fillBar.style.width = position + "%";
-    setTimeInDom(currentTime);
-  });
 
   // выбираем первый трек
   pushUnpushButtons(String(currentAudio), []);
-
-  function searching(value) {
-    audios = [];
-    for (let i = 0; i < audiosArray.length; i++) {
-      if (audiosArray[i].search(new RegExp(value, "i")) != -1) {
-        audios.push(audiosArray[i]);
-      }
-    }
-    return audios;
-  }
-
-  function volumeInit(currentVolume) {
-    audio.volume = currentVolume;
-    document.getElementById("volume_position").style.width =
-      currentVolume * 100 + "%";
-  }
 
   // вешаем обработчики на кнопки выбора аудио
   function setOnClickButtonSetAudio() {
@@ -102,6 +106,31 @@ window.onload = () => {
         setAudio(audios);
       };
     }
+  }
+
+  // для строки поиска
+  function searching(value) {
+    audios = [];
+    for (let i = 0; i < audiosArray.length; i++) {
+      if (audiosArray[i].search(new RegExp(value, "i")) != -1) {
+        audios.push(audiosArray[i]);
+      }
+    }
+    return audios;
+  }
+
+  // отрисовка громкости звука браузера
+  function volumeInit(currentVolume) {
+    audio.volume = currentVolume;
+    document.getElementById("volume_position").style.width =
+      currentVolume * 100 + "%";
+  }
+
+  // для выбора с какого места прослушивать
+  function currentTimeInit(positionX) {
+    audio.currentTime =
+      (duration * positionX) /
+      document.getElementById("line_current_time_buffered").offsetWidth;
   }
 
   // добавляем обработчики событий нажатия клавиш на панели управления
@@ -161,6 +190,7 @@ window.onload = () => {
     audio.play();
   }
 
+  // для обработки нажатия на кнопку MUTE
   function muteAudio() {
     if (!isButtonPushed("mute")) {
       pushUnpushButtons("mute", []);
@@ -170,6 +200,7 @@ window.onload = () => {
     audio.muted = !audio.muted;
   }
 
+  // поиск текущего трека по ID
   function getId() {
     for (let i = 0; i < document.querySelectorAll("button").length; i++) {
       if (
@@ -217,6 +248,7 @@ window.onload = () => {
     }
   }
 
+  // выясяем нажата ли кнопка или нет
   function isButtonPushed(id) {
     let anchor = document.getElementById(id);
     let theClass = anchor.getAttribute("class");
@@ -281,6 +313,7 @@ window.onload = () => {
     }
   }
 
+  // добавляем необходимое время в столбец DURATION
   function setTimeInDom(time) {
     i = getId();
     if (document.getElementById(i)) {
@@ -292,6 +325,7 @@ window.onload = () => {
     }
   }
 
+  // отлавливаем ошибки
   function errorHandler() {
     let audio = document.getElementByld("audio");
     if (audio.error) {
