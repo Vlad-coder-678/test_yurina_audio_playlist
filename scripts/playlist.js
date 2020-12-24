@@ -68,8 +68,6 @@ window.onload = () => {
     fillBar.style.width = position + "%";
     if (duration > 0) {
       for (let i = 0; i < audio.buffered.length; i++) {
-        console.log("i");
-        console.log(i);
         if (
           audio.buffered.start(audio.buffered.length - 1 - i) <
           audio.currentTime
@@ -130,7 +128,7 @@ window.onload = () => {
   function currentTimeInit(positionX) {
     audio.currentTime =
       (duration * positionX) /
-      document.getElementById("line_current_time_buffered").offsetWidth;
+      document.getElementById("box_current_time").offsetWidth;
   }
 
   // добавляем обработчики событий нажатия клавиш на панели управления
