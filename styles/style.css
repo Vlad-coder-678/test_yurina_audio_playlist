@@ -16,6 +16,7 @@ body {
   border-bottom: 1px solid black;
 }
 .line_current_time {
+  position: relative;
   border: 1px solid black;
   box-shadow: 2px 2px 4px 0px #000;
   margin: 15px auto;
@@ -23,8 +24,21 @@ body {
   height: 10px;
 }
 .line_current_time_position {
+  position: absolute;
+  top: 0;
+  left: 0;
   background-color: #990099;
+  width: 100%;
   height: 10px;
+  z-index: 3;
+}
+.line_current_time_buffered {
+  position: absolute;
+  background-color: orchid;
+  top: 0;
+  left: 0;
+  height: 10px;
+  z-index: 2;
 }
 
 /* ----- controls -------- */
