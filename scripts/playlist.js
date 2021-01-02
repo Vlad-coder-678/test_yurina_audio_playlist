@@ -7,11 +7,7 @@ window.onload = () => {
     "./assets/audio/Ivan_Boyarkin-Wasteland_(feat._Vladimir_Lebedev).mp3",
     "./assets/audio/Ivan_Boyarkin-Whatever_You_Want_(feat._A._Chevajevskaya_and_S._Velichko).mp3",
   ];
-
-  setAudioInDom(audiosArray);
   let audios = audiosArray;
-  durationInit();
-
   let audio = new Audio();
   let currentAudio = 0;
   let fillBar = document.getElementById("line_current_time_position");
@@ -23,77 +19,14 @@ window.onload = () => {
   audio.setAttribute("id", "audio");
   audio.src = audios[currentAudio];
   audio.load();
-  volumeInit(currentVolume);
 
-  // вешаем обработчики на кнопки выбора аудио
-  setOnClickButtonSetAudio();
-
-  // вешаем обработчики на кнопки управления
-  document.getElementById("prev").onclick = () => {
-    setTimeInDom(audio.duration);
-    prevAudio();
-  };
-  document.getElementById("play").onclick = playAudio;
-  document.getElementById("next").onclick = () => {
-    setTimeInDom(audio.duration);
-    nextAudio();
-  };
-  document.getElementById("mute").onclick = muteAudio;
-  document.getElementById("volume").onclick = () => {
-    volumeInit(Number(event.offsetX) / 100);
-  };
-  document.getElementById("line_current_time").onclick = () => {
-    currentTimeInit(Number(event.offsetX));
-  };
-  document.getElementById("input_searcher").oninput = () => {
-    valueSearcher = event.target.value;
-    if (valueSearcher.length >= 3 && valueSearcher.length <= 20) {
-      setAudioInDom(searching(valueSearcher));
-      durationInit();
-    } else {
-      audios = audiosArray;
-      setAudioInDom(audios);
-      durationInit();
-    }
-  };
-
-  // добавляем слушатели
-  audio.addEventListener("loadedmetadata", () => {
-    duration = audio.duration;
-  });
-  audio.addEventListener("timeupdate", () => {
-    currentTime = audio.currentTime;
-    setTimeInDom(currentTime);
-    let position = (currentTime / duration) * 100;
-    fillBar.style.width = position + "%";
-    if (duration > 0) {
-      for (let i = 0; i < audio.buffered.length; i++) {
-        if (
-          audio.buffered.start(audio.buffered.length - 1 - i) <
-          audio.currentTime
-        ) {
-          let widthLine =
-            (audio.buffered.end(audio.buffered.length - 1 - i) / duration) *
-            100;
-          document.getElementById("line_current_time_buffered").style.width =
-            widthLine + "%";
-          break;
-        }
-      }
-    }
-  });
-  audio.addEventListener("error", errorHandler, false);
-  audio.addEventListener(
-    "ended",
-    () => {
-      setTimeInDom(audio.duration);
-      nextAudio();
-    },
-    false
-  );
-
-  // выбираем первый трек
-  pushUnpushButtons(String(currentAudio), []);
+  setAudioInDom(audiosArray); // создаём плейлист в виде DOM элементов
+  durationInit(); // добавляем duration в DOM
+  volumeInit(currentVolume); // отрисовка громкости звука браузера
+  setOnClickButtonSetAudio(); // вешаем обработчики на кнопки выбора аудио
+  setOnClickButtonControl(); // вешаем обработчики на кнопки управления
+  addOnButtonEventListener(); // добавляем слушатели
+  pushUnpushButtons(String(currentAudio), []); // выбираем первый трек
 
   // вешаем обработчики на кнопки выбора аудио
   function setOnClickButtonSetAudio() {
@@ -105,7 +38,36 @@ window.onload = () => {
       };
     }
   }
-
+  // вешаем обработчики на кнопки управления
+  function setOnClickButtonControl() {
+    document.getElementById("prev").onclick = () => {
+      setTimeInDom(audio.duration);
+      prevAudio();
+    };
+    document.getElementById("play").onclick = playAudio;
+    document.getElementById("next").onclick = () => {
+      setTimeInDom(audio.duration);
+      nextAudio();
+    };
+    document.getElementById("mute").onclick = muteAudio;
+    document.getElementById("volume").onclick = () => {
+      volumeInit(Number(event.offsetX) / 100);
+    };
+    document.getElementById("line_current_time").onclick = () => {
+      currentTimeInit(Number(event.offsetX));
+    };
+    document.getElementById("input_searcher").oninput = () => {
+      valueSearcher = event.target.value;
+      if (valueSearcher.length >= 3 && valueSearcher.length <= 20) {
+        setAudioInDom(searching(valueSearcher));
+        durationInit();
+      } else {
+        audios = audiosArray;
+        setAudioInDom(audios);
+        durationInit();
+      }
+    };
+  }
   // для строки поиска
   function searching(value) {
     audios = [];
@@ -116,21 +78,54 @@ window.onload = () => {
     }
     return audios;
   }
-
   // отрисовка громкости звука браузера
   function volumeInit(currentVolume) {
     audio.volume = currentVolume;
     document.getElementById("volume_position").style.width =
       currentVolume * 100 + "%";
   }
-
   // для выбора с какого места прослушивать
   function currentTimeInit(positionX) {
     audio.currentTime =
       (duration * positionX) /
       document.getElementById("box_current_time").offsetWidth;
   }
-
+  // добавляем слушатели
+  function addOnButtonEventListener() {
+    audio.addEventListener("loadedmetadata", () => {
+      duration = audio.duration;
+    });
+    audio.addEventListener("timeupdate", () => {
+      currentTime = audio.currentTime;
+      setTimeInDom(currentTime);
+      let position = (currentTime / duration) * 100;
+      fillBar.style.width = position + "%";
+      if (duration > 0) {
+        for (let i = 0; i < audio.buffered.length; i++) {
+          if (
+            audio.buffered.start(audio.buffered.length - 1 - i) <
+            audio.currentTime
+          ) {
+            let widthLine =
+              (audio.buffered.end(audio.buffered.length - 1 - i) / duration) *
+              100;
+            document.getElementById("line_current_time_buffered").style.width =
+              widthLine + "%";
+            break;
+          }
+        }
+      }
+    });
+    audio.addEventListener("error", errorHandler, false);
+    audio.addEventListener(
+      "ended",
+      () => {
+        setTimeInDom(audio.duration);
+        nextAudio();
+      },
+      false
+    );
+  }
   // добавляем обработчики событий нажатия клавиш на панели управления
   function prevAudio() {
     pushUnpushButtons("prev", []);
@@ -154,7 +149,6 @@ window.onload = () => {
     pushUnpushButtons("play", []);
     audio.play();
   }
-
   function playAudio() {
     if (!isButtonPushed("play")) {
       pushUnpushButtons("play", []);
@@ -164,7 +158,6 @@ window.onload = () => {
       audio.pause();
     }
   }
-
   function nextAudio() {
     pushUnpushButtons("next", []);
     setTimeout(() => {
@@ -187,7 +180,6 @@ window.onload = () => {
     pushUnpushButtons("play", []);
     audio.play();
   }
-
   // для обработки нажатия на кнопку MUTE
   function muteAudio() {
     if (!isButtonPushed("mute")) {
@@ -197,7 +189,6 @@ window.onload = () => {
     }
     audio.muted = !audio.muted;
   }
-
   // поиск текущего трека по ID
   function getId() {
     for (let i = 0; i < document.querySelectorAll("button").length; i++) {
@@ -209,7 +200,6 @@ window.onload = () => {
       }
     }
   }
-
   // функция обработки выбора аудио
   function setAudio(audios) {
     let currentAudio = event.target.closest("button").getAttribute("id");
@@ -224,7 +214,6 @@ window.onload = () => {
     pushUnpushButtons("play", []);
     audio.play();
   }
-
   // визуальная обработка нажатия кнопок
   function pushUnpushButtons(idToPush, idArrayToUnpush) {
     if (idToPush != "") {
@@ -245,7 +234,6 @@ window.onload = () => {
       }
     }
   }
-
   // выясяем нажата ли кнопка или нет
   function isButtonPushed(id) {
     let anchor = document.getElementById(id);
@@ -257,7 +245,6 @@ window.onload = () => {
       return false;
     }
   }
-
   // создаём плейлист в виде DOM элементов
   function setAudioInDom(audios) {
     let boxAudio = document.getElementById("boxAudioSelection");
@@ -295,7 +282,6 @@ window.onload = () => {
     }
     setOnClickButtonSetAudio();
   }
-
   // добавляем duration в DOM
   function durationInit() {
     for (let i = 0; i < audios.length; i++) {
@@ -310,7 +296,6 @@ window.onload = () => {
       });
     }
   }
-
   // добавляем необходимое время в столбец DURATION
   function setTimeInDom(time) {
     i = getId();
@@ -322,7 +307,6 @@ window.onload = () => {
         Math.floor(time % 60);
     }
   }
-
   // отлавливаем ошибки
   function errorHandler() {
     let audio = document.getElementByld("audio");
